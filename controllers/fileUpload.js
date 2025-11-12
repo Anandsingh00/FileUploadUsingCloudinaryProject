@@ -1,5 +1,5 @@
 const File = require('../models/File');
-
+const cloudinary = require('cloudinary').v2;
 exports.localFileUpload =  async(req,res)=>{
     try {
 
@@ -24,5 +24,67 @@ exports.localFileUpload =  async(req,res)=>{
     } catch (error) {
         console.log("Error in localfileUpload function");
         console.log(error);
+    }
+}
+
+
+function isFileTypeSupported(type,suppportedType){
+    return suppportedType.includes(type);
+}
+
+async function uploadFileToCloudinary(file,folder){
+    const options = {folder};
+     return await cloudinary.uploader.upload(file.tempFilePath,options);
+}
+
+// image upload handler
+exports.imageUpload = async(req,res)=>{
+    try {
+        //fetch the media from the request body
+        const {name,tags,email} = req.body;
+       // console.log(name,tags,email,imageFile);
+
+        const file = req.files.imageFile;
+         console.log(file);
+
+
+        //validation
+        const supportFile = ["jpg","png","jpeg"];
+        const fileType = file.name.split('.')[1].toLowerCase();
+        console.log(fileType);// this is correct
+        if(!isFileTypeSupported(fileType,supportFile)){
+            return res.status(400).json({
+                succes:false,
+                message:"File format not supported"
+            });
+        }
+
+
+        //file format supported
+        //upload to cloudinary
+
+        const response = await uploadFileToCloudinary(file,"AnandCloud"); // file and folder name of cloudinary
+        console.log("File uploaded to cloudinary ",response);
+        //save the entry to db
+        const fileData  = await File.create({
+            name,
+            tags,
+            email,
+            imageUrl:response.secure_url
+        })
+
+        return res.status(200).json({
+            success:true,
+            imageUrl:response.secure_url,
+            message:"Image Successfully uploaded"
+        });
+
+    } catch (error) {
+        console.log("Error in imageUpload function")
+        console.log(error);
+        return res.status(501).json({
+            success:false,
+            message:"Something went wrong"
+        })
     }
 }

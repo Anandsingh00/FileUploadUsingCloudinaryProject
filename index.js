@@ -2,14 +2,16 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 
-
 //define the port
 const PORT = process.env.PORT || 3000;
 
 //middlewares
 app.use(express.json());
 const fileUpload=require('express-fileupload');
-app.use(fileUpload());
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/'   // temp directory where files are stored before upload
+}));
 
 //connect to db
 const db = require("./config/database");
@@ -18,8 +20,6 @@ db.connect();
 //connect to cloudinary
 const cloudinary=require('./config/cloudinary');
 cloudinary.cloudinaryConnect();
-
-
 
 //api mount
 const Upload = require('./routes/FileUpload');
