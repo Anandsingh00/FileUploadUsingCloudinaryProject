@@ -7,7 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 //middlewares
 app.use(express.json());
-const fileUpload=require('express-fileupload');
+
+const fileUpload = require('express-fileupload');
+
 app.use(fileUpload({
     useTempFiles: true,
     tempFileDir: '/tmp/'   // temp directory where files are stored before upload
@@ -18,7 +20,7 @@ const db = require("./config/database");
 db.connect();
 
 //connect to cloudinary
-const cloudinary=require('./config/cloudinary');
+const cloudinary = require('./config/cloudinary');
 cloudinary.cloudinaryConnect();
 
 //api mount
